@@ -94,6 +94,7 @@ use App\Http\Controllers\NotaCreditoController;
 use App\Http\Controllers\NotaCreditoDocumentoController;
 use App\Http\Controllers\NotaCreditoCanceladaController;
 use App\Http\Controllers\FabricaController;
+use App\Http\Controllers\SucursalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -687,6 +688,14 @@ Route::prefix('/serie_cfdi')->group(function(){
     Route::post('/store', [SerieCfdiController::class, 'store']);
     Route::put('/{id}', [SerieCfdiController::class, 'update']);
     Route::delete('/{id}', [SerieCfdiController::class, 'destroy']);
+});
+
+Route::get('/sucursal', [SucursalController::class, 'index']);
+Route::get('/sucursal/{id}', [SucursalController::class, 'show']);
+Route::prefix('/sucursal')->group(function(){
+    Route::post('/store', [SucursalController::class, 'store']);
+    Route::put('/{id}', [SucursalController::class, 'update']);
+    Route::delete('/{id}', [SucursalController::class, 'destroy']);
 });
 
 Route::get('/sueldos_salarios', [SueldosSalariosController::class, 'index']);
