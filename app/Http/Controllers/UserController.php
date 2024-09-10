@@ -23,6 +23,11 @@ class UserController extends Controller
         parent::__construct($modelo, $tabla);
     }
 
+    public function index()
+    {
+        return User::select('users.*')->orderBy('id', 'ASC')->get();
+    }
+
     /**
      * authenticate user.
      *
@@ -30,6 +35,7 @@ class UserController extends Controller
      */
     public function authenticate(Request $request)
     {
+        return json_encode(['mesaage'=>'hooola mundooooo']);
         if($request->input('username') === NULL && $request->input('password') === NULL){
             $response = [
                 'success' => false,
@@ -38,7 +44,7 @@ class UserController extends Controller
             return response()->json($response);
         }
         $user = User::select('users.id', 'users.name', 'users.email', 'users.grupo_id')
-            ->where('users.name', '=', $request->input('username'))
+            ->where('users.username', '=', $request->input('username'))
             ->where('users.password', '=', $request->input('password'))
             ->sole()
             ->toArray();
@@ -49,13 +55,13 @@ class UserController extends Controller
             ];
             return response()->json($response);
         }
-        if((string)$user['grupo_id'] === ''){
+        /*if((string)$user['grupo_id'] === ''){
             $response = [
                 'success' => false,
                 'message' => 'Error user no tiene un grupo ACL asignado',
             ];
             return response()->json($response);
-        }
+        }*/
         return json_encode($user);
     }
 
