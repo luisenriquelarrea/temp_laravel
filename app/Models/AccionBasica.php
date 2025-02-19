@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AccionBasica extends Model
 {
-    use HasFactory;
     protected $table = 'accion_basica';
+    protected $fillable = [
+        'descripcion', 
+        'call_method', 
+        'label', 
+        'icon', 
+        'on_breadcrumb', 
+        'on_navbar', 
+        'on_table', 
+        'user_created_id', 
+        'user_updated_id'
+    ];
 }

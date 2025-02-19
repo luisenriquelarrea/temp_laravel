@@ -3,19 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccionBasica;
+use Illuminate\Http\Request;
 
 class AccionBasicaController extends Controller
 {
-    /**
-     * Constructor.
-     *
-     */
-    public function __construct(){
-        $modelo = new AccionBasica;
-        $tabla = 'accion_basica';
-        parent::__construct($modelo, $tabla);
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -23,20 +14,60 @@ class AccionBasicaController extends Controller
      */
     public function index()
     {
-        return AccionBasica::select('accion_basica.*')->orderBy('id', 'ASC')->get();
+        $records = AccionBasica::all();
+        return response()->json($records, 200);
     }
 
     /**
-     * Display a listing of the resource where on_navbar = 1.
+     * Store a newly created resource in storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function get_accion_navbar()
+    public function store(Request $request)
     {
-        return AccionBasica::select('accion_basica.id', 'accion_basica.descripcion', 
-            'accion_basica.call_method')
-            ->where('accion_basica.on_navbar', '=', 1)
-            ->orderBy('id', 'ASC')
-            ->get();
+        $record = AccionBasica::create($request->all());
+        return response()->json($record, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(int $id)
+    {
+        $record = AccionBasica::find($id);
+        if (!$record)
+            return response()->json(['message' => 'record not found'], 404);
+        return response()->json($record, 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, int $id)
+    {
+        $record = AccionBasica::findOrFail($id);
+        $record->update($request->all());
+        return response()->json($record, 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(int $id)
+    {
+        $record = AccionBasica::findOrFail($id);
+        $record->delete();
+        return response()->json(null, 204);
     }
 }

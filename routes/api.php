@@ -41,7 +41,6 @@ Route::prefix('/accion_basica')->group(function(){
     Route::post('/store', [AccionBasicaController::class, 'store']);
     Route::put('/{id}', [AccionBasicaController::class, 'update']);
     Route::delete('/{id}', [AccionBasicaController::class, 'destroy']);
-    Route::post('/defaults_navbar', [AccionBasicaController::class, 'get_accion_navbar']);
 });
 
 Route::get('/accion_grupo', [AccionGrupoController::class, 'index']);
