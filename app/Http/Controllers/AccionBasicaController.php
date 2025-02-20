@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccionBasica;
+use App\Filters\AccionBasicaFilter;
 use Illuminate\Http\Request;
 
 class AccionBasicaController extends Controller
@@ -69,5 +70,17 @@ class AccionBasicaController extends Controller
         $record = AccionBasica::findOrFail($id);
         $record->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * Display a listing of the resource filtered.
+     * @param  AccionBasicaFilter $filters
+     * @return \Illuminate\Http\Response
+     */
+    public function filteredList(AccionBasicaFilter $filters)
+    {
+        $records = AccionBasica::query();
+        $filteredRecords = $filters->apply($records);
+        return response()->json($filteredRecords, 200);
     }
 }
