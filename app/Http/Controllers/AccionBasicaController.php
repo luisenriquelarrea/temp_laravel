@@ -74,6 +74,7 @@ class AccionBasicaController extends Controller
 
     /**
      * Display a listing of the resource filtered.
+     * 
      * @param  AccionBasicaFilter $filters
      * @return \Illuminate\Http\Response
      */
