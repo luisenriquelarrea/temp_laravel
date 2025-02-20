@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccionBasica;
-use App\Filters\AccionBasicaFilter;
+use App\Http\Filters\AccionBasicaFilter;
 use Illuminate\Http\Request;
 
 class AccionBasicaController extends Controller

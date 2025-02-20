@@ -9,7 +9,6 @@ use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\AccionController;
 use App\Http\Controllers\AccionGrupoController;
 use App\Http\Controllers\AccionBasicaController;
-use App\Http\Controllers\SueldosSalariosController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -33,6 +32,7 @@ Route::prefix('/accion')->group(function(){
     Route::post('/store', [AccionController::class, 'store']);
     Route::put('/{id}', [AccionController::class, 'update']);
     Route::delete('/{id}', [AccionController::class, 'destroy']);
+    Route::post('/filteredList', [AccionController::class, 'filteredList']);
 });
 
 Route::get('/accion_basica', [AccionBasicaController::class, 'index']);
@@ -50,10 +50,7 @@ Route::prefix('/accion_grupo')->group(function(){
     Route::post('/store', [AccionGrupoController::class, 'store']);
     Route::put('/{id}', [AccionGrupoController::class, 'update']);
     Route::delete('/{id}', [AccionGrupoController::class, 'destroy']);
-    Route::post('/allowed_menus', [AccionGrupoController::class, 'get_allowed_menus']);
-    Route::post('/allowed_table_actions', [AccionGrupoController::class, 'get_allowed_table_actions']);
-    Route::post('/allowed_navbar', [AccionGrupoController::class, 'get_allowed_navbar']);
-    Route::post('/has_xls_button', [AccionGrupoController::class, 'get_xls_button']);
+    Route::post('/filteredList', [AccionGrupoController::class, 'filteredList']);
 });
 
 Route::get('/grupo', [GrupoController::class, 'index']);
@@ -62,6 +59,16 @@ Route::prefix('/grupo')->group(function(){
     Route::post('/store', [GrupoController::class, 'store']);
     Route::put('/{id}', [GrupoController::class, 'update']);
     Route::delete('/{id}', [GrupoController::class, 'destroy']);
+    Route::post('/filteredList', [GrupoController::class, 'filteredList']);
+});
+
+Route::get('/menu', [MenuController::class, 'index']);
+Route::get('/menu/{id}', [MenuController::class, 'show']);
+Route::prefix('/menu')->group(function(){
+    Route::post('/store', [MenuController::class, 'store']);
+    Route::put('/{id}', [MenuController::class, 'update']);
+    Route::delete('/{id}', [MenuController::class, 'destroy']);
+    Route::post('/filteredList', [MenuController::class, 'filteredList']);
 });
 
 Route::get('/seccion_menu', [SeccionMenuController::class, 'index']);
@@ -70,7 +77,7 @@ Route::prefix('/seccion_menu')->group(function(){
     Route::post('/store', [SeccionMenuController::class, 'store']);
     Route::put('/{id}', [SeccionMenuController::class, 'update']);
     Route::delete('/{id}', [SeccionMenuController::class, 'destroy']);
-    Route::post('/desc', [SeccionMenuController::class, 'get_seccion_menu']);
+    Route::post('/filteredList', [SeccionMenuController::class, 'filteredList']);
 });
 
 Route::get('/seccion_menu_input', [SeccionMenuInputController::class, 'index']);
@@ -79,23 +86,9 @@ Route::prefix('/seccion_menu_input')->group(function(){
     Route::post('/store', [SeccionMenuInputController::class, 'store']);
     Route::put('/{id}', [SeccionMenuInputController::class, 'update']);
     Route::delete('/{id}', [SeccionMenuInputController::class, 'destroy']);
-    Route::post('/inputs', [SeccionMenuInputController::class, 'get_inputs_alta']);
-    Route::post('/inputs_modifica', [SeccionMenuInputController::class, 'get_inputs_modifica']);
-    Route::post('/table_columns', [SeccionMenuInputController::class, 'get_table_columns']);
-    Route::post('/inputs_filtro', [SeccionMenuInputController::class, 'get_inputs_filtro']);
+    Route::post('/filteredList', [SeccionMenuInputController::class, 'filteredList']);
 });
 
-Route::get('/sueldos_salarios', [SueldosSalariosController::class, 'index']);
-Route::get('/sueldos_salarios/{id}', [SueldosSalariosController::class, 'show']);
-Route::prefix('/sueldos_salarios')->group(function(){
-    Route::post('/store', [SueldosSalariosController::class, 'store']);
-    Route::put('/{id}', [SueldosSalariosController::class, 'update']);
-    Route::delete('/{id}', [SueldosSalariosController::class, 'destroy']);
-    Route::post('/calcula_sueldos_salarios', [SueldosSalariosController::class, 'calcula_valores_sueldos_salarios']);
-    Route::post('/neto_aprox', [SueldosSalariosController::class, 'obten_aproximacion_neto']);
-});
-
-Route::get('/user', [UserController::class, 'index']);
 Route::prefix('/user')->group(function(){
     Route::post('/authen', [UserController::class, 'authenticate']);
     Route::get('/auth_error', [UserController::class, 'auth_error'])->name('auth_error');
