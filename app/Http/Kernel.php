@@ -42,6 +42,7 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\TransformApiResponse::class,
+            \App\Http\Middleware\TransformForeignKeys::class,
         ],
     ];
 

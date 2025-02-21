@@ -39,7 +39,7 @@ class AccionController extends Controller
      */
     public function show(int $id)
     {
-        $record = Accion::find($id);
+        $record = Accion::with('seccionMenu')->find($id);
         if (!$record)
             return response()->json(['message' => 'record not found'], 404);
         return response()->json($record, 200);
