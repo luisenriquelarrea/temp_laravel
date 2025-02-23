@@ -2,168 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\AccionGrupo;
+use App\Http\Filters\AccionGrupoFilter;
+use Illuminate\Http\Request;
 
 class AccionGrupoController extends Controller
 {
-    /**
-     * Constructor.
-     *
-     */
-    public function __construct(){
-        $modelo = new AccionGrupo;
-        $tabla = 'accion_grupo';
-        parent::__construct($modelo, $tabla);
-    }
-
-    /**
-     * Display a seccion_menu data by descripcion.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function get_allowed_menus(Request $request)
-    {
-        if((string)trim($request->input['grupo_id']) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[grupo_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        $grupo_id = $request->input('grupo_id');
-        $accion_grupo = AccionGrupo::select('menu.label AS menu_label', 'menu.icon AS menu_icon', 'menu.orden AS menu_orden', 
-            'seccion_menu.descripcion AS seccion_menu_descripcion', 'seccion_menu.navbar_label AS seccion_menu_navbar_label')
-            ->join('grupo', 'grupo.id', '=', 'accion_grupo.grupo_id')
-            ->join('accion', 'accion.id', '=', 'accion_grupo.accion_id')
-            ->join('seccion_menu', 'seccion_menu.id', '=', 'accion.seccion_menu_id')
-            ->join('menu', 'menu.id', '=', 'seccion_menu.menu_id')
-            ->where('accion_grupo.grupo_id', '=', $grupo_id)
-            ->where('grupo.status', '=', 1)
-            ->where('accion.status', '=', 1)
-            ->where('seccion_menu.status', '=', 1)
-            ->where('menu.status', '=', 1)
-            ->where('accion.on_navbar', '=', 1)
-            ->groupBy('seccion_menu.id')
-            ->orderBy('menu.orden', 'ASC')
-            ->get();
-        if($accion_grupo->isEmpty()){
-            $response = [
-                'success' => false,
-                'message' => 'Error no hay informacion en accion_grupo',
-            ];
-            return response()->json($response, 500);
-        }
-        $accion_grupo = json_decode($accion_grupo, true);
-        $accion_grupo = $this->group_data($accion_grupo, 'menu_label');
-        return json_encode($accion_grupo);
-    }
-
-    /**
-     * Get allowed navbar permissions.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function get_allowed_navbar(Request $request){
-        if((string)trim($request->input('grupo_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[grupo_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        if((string)trim($request->input('seccion_menu_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[seccion_menu_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        $grupo_id = $request->input('grupo_id');
-        $seccion_menu_id = $request->input('seccion_menu_id');
-        return AccionGrupo::select('accion_grupo.id AS accion_grupo_id',
-                'accion.descripcion', 'accion.label', 'accion.icon', 
-                'accion.call_method')
-            ->join('accion', 'accion.id', '=', 'accion_grupo.accion_id')
-            ->where('accion_grupo.grupo_id', '=', $grupo_id)
-            ->where('accion_grupo.status', '=', 1)
-            ->where('accion.seccion_menu_id', '=', $seccion_menu_id)
-            ->where('accion.status', '=', 1)
-            ->where('accion.on_navbar', '=', 1)
-            ->get();
-    }
-
-    /**
-     * Get allowed table permissions.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function get_allowed_table_actions(Request $request){
-        if((string)trim($request->input('grupo_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[grupo_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        if((string)trim($request->input('seccion_menu_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[seccion_menu_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        $grupo_id = $request->input('grupo_id');
-        $seccion_menu_id = $request->input('seccion_menu_id');
-        return AccionGrupo::select('accion_grupo.id AS accion_grupo_id',
-                'accion.descripcion', 'accion.label', 'accion.icon', 
-                'accion.call_method')
-            ->join('accion', 'accion.id', '=', 'accion_grupo.accion_id')
-            ->where('accion_grupo.grupo_id', '=', $grupo_id)
-            ->where('accion_grupo.status', '=', 1)
-            ->where('accion.seccion_menu_id', '=', $seccion_menu_id)
-            ->where('accion.status', '=', 1)
-            ->where('accion.on_table', '=', 1)
-            ->get();
-    }
-
-    /**
-     * Get allowed XLS button permission.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function get_xls_button(Request $request){
-        if((string)trim($request->input('grupo_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[grupo_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        if((string)trim($request->input('seccion_menu_id')) === ''){
-            $response = [
-                'success' => false,
-                'message' => 'Error $request->input[seccion_menu_id] debe estar asignado',
-            ];
-            return response()->json($response);
-        }
-        $grupo_id = $request->input('grupo_id');
-        $seccion_menu_id = $request->input('seccion_menu_id');
-        return AccionGrupo::select('accion_grupo.id AS accion_grupo_id',
-                'accion.descripcion', 'accion.label', 'accion.icon', 
-                'accion.call_method')
-            ->join('accion', 'accion.id', '=', 'accion_grupo.accion_id')
-            ->where('accion_grupo.grupo_id', '=', $grupo_id)
-            ->where('accion_grupo.status', '=', 1)
-            ->where('accion.seccion_menu_id', '=', $seccion_menu_id)
-            ->where('accion.status', '=', 1)
-            ->where('accion.descripcion', '=', 'xls')
-            ->get();
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -171,10 +15,77 @@ class AccionGrupoController extends Controller
      */
     public function index()
     {
-        return AccionGrupo::select('grupo.descripcion AS grupo_descripcion', 'accion.descripcion AS accion_descripcion')
-            ->join('grupo', 'grupo.id', '=', 'accion_grupo.grupo_id')
+        $records = AccionGrupo::all();
+        return response()->json($records, 200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $record = AccionGrupo::create($request->all());
+        return response()->json($record, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(int $id)
+    {
+        $record = AccionGrupo::with(['accion', 'grupo', 'accion.seccionMenu'])->find($id);
+        if (!$record)
+            return response()->json(['message' => 'record not found'], 404);
+        return response()->json($record, 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, int $id)
+    {
+        $record = AccionGrupo::findOrFail($id);
+        $record->update($request->all());
+        return response()->json($record, 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(int $id)
+    {
+        $record = AccionGrupo::findOrFail($id);
+        $record->delete();
+        return response()->json(null, 204);
+    }
+
+    /**
+     * Display a listing of the resource filtered.
+     * 
+     * @param  AccionGrupoFilter $filters
+     * @return \Illuminate\Http\Response
+     */
+    public function filteredList(AccionGrupoFilter $filters)
+    {
+        $records = AccionGrupo::with(['accion', 'grupo', 'accion.seccionMenu'])
             ->join('accion', 'accion.id', '=', 'accion_grupo.accion_id')
-            ->orderBy('grupo.id', 'ASC')
-            ->get();
+            ->join('grupo', 'grupo.id', '=', 'accion_grupo.grupo_id')
+            ->join('seccion_menu', 'seccion_menu.id', '=', 'accion.seccion_menu_id')
+            ->select('accion_grupo.*');
+        $filteredRecords = $filters->apply($records);
+        return response()->json($filteredRecords, 200);
     }
 }
