@@ -42,6 +42,15 @@ class AccionGrupoFilter {
         if ($this->request->has('grupoStatus'))
             $this->filterByGrupoStatus($this->request->input('grupoStatus'));
 
+        if ($this->request->has('seccionMenuStatus'))
+            $this->filterBySeccionMenuStatus($this->request->input('seccionMenuStatus'));
+
+        if ($this->request->has('accionOnNavbar'))
+            $this->filterByAccionOnNavbar($this->request->input('accionOnNavbar'));
+
+        if ($this->request->has('accionOnTable'))
+            $this->filterByAccionOnTable($this->request->input('accionOnTable'));
+
         return $this->paginate();
     }
 
@@ -89,5 +98,20 @@ class AccionGrupoFilter {
     protected function filterByGrupoStatus($grupoStatus)
     {
         return $this->builder->where('grupo.status', '=', $grupoStatus);
+    }
+
+    protected function filterBySeccionMenuStatus($seccionMenuStatus)
+    {
+        return $this->builder->where('seccion_menu.status', '=', $seccionMenuStatus);
+    }
+
+    protected function filterByAccionOnNavbar($accionOnNavbar)
+    {
+        return $this->builder->where('accion.on_navbar', '=', $accionOnNavbar);
+    }
+
+    protected function filterByAccionOnTable($accionOnTable)
+    {
+        return $this->builder->where('accion.on_table', '=', $accionOnTable);
     }
 }
