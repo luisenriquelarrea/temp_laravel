@@ -90,6 +90,5 @@ Route::prefix('/seccion_menu_input')->group(function(){
 });
 
 Route::prefix('/user')->group(function(){
-    Route::post('/authen', [UserController::class, 'authenticate']);
-    Route::get('/auth_error', [UserController::class, 'auth_error'])->name('auth_error');
+    Route::post('/authenticate', [UserController::class, 'authenticate']);
 });
