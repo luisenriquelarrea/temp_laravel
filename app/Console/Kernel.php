@@ -5,8 +5,6 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
-use App\Console\Schedules\DescargaMasivaSat;
-
 class Kernel extends ConsoleKernel
 {
     /**
@@ -15,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \App\Console\Commands\DescargaMasivaSatCommand::class,
+        //
     ];
 
     /**
@@ -26,9 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(new DescargaMasivaSat)
-            ->daily()
-            ->sendOutputTo(storage_path('logs/schedule.log'));
+        //
     }
 
     /**
