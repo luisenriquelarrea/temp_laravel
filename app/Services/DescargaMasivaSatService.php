@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
+use App\Models\SatDownloadRequest;
 
 use PhpCfdi\SatWsDescargaMasiva\RequestBuilder\FielRequestBuilder\Fiel;
 use PhpCfdi\SatWsDescargaMasiva\RequestBuilder\FielRequestBuilder\FielRequestBuilder;
@@ -62,32 +65,48 @@ class DescargaMasivaSatService
         return new Service($requestBuilder, $webClient);
     }
 
+    /**
+     * $query = QueryParameters::create()
+     *   ->withPeriod(DateTimePeriod::createFromValues('2019-01-13 00:00:00', '2019-01-13 23:59:59'))
+     *   ->withDownloadType(DownloadType::received())
+     *   ->withRequestType(RequestType::xml())
+     *   ->withDocumentType(DocumentType::ingreso())
+     *   ->withComplement(ComplementoCfdi::leyendasFiscales10())
+     *   ->withDocumentStatus(DocumentStatus::active())
+     *  ->withRfcOnBehalf(RfcOnBehalf::create('XXX01010199A'))
+     *   ->withRfcMatch(RfcMatch::create('MAG041126GT8'))
+     *   ->withUuid(Uuid::create('96623061-61fe-49de-b298-c7156476aa8b'))
+     */
+
     public function createRequest(string $start, string $end): string
     {
-        $service = $this->createService();
+        return DB::transaction(function () use ($start, $end) {
 
-        $request = QueryParameters::create()
-            ->withPeriod(DateTimePeriod::createFromValues($start, $end))
-            //->withDownloadType(DownloadType::received())
-            ->withRequestType(RequestType::xml());
-            //->withDocumentType(DocumentType::ingreso())
-            //->withDocumentStatus(DocumentStatus::active());
+            $service = $this->createService();
 
-        //$query = $service->query($request);
+            $request = QueryParameters::create()
+                ->withPeriod(DateTimePeriod::createFromValues($start, $end))
+                ->withRequestType(RequestType::xml());
 
-        try {
             $query = $service->query($request);
-        } catch (\Throwable $e) {
-            dd($e->getPrevious());
-        }
 
-        if (!$query->getStatus()->isAccepted()) {
-            throw new RuntimeException(
-                'Error al crear solicitud: ' . $query->getStatus()->getMessage()
-            );
-        }
+            if (!$query->getStatus()->isAccepted()) {
+                throw new RuntimeException(
+                    'Error al crear solicitud: ' . $query->getStatus()->getMessage()
+                );
+            }
 
-        return $query->getRequestId();
+            $requestId = $query->getRequestId();
+
+            SatDownloadRequest::create([
+                'request_id' => $requestId,
+                'date_start' => $start,
+                'date_end' => $end,
+                'status' => 'CREATED',
+            ]);
+
+            return $requestId;
+        });
     }
 
     public function verifyRequest(string $requestId): VerifyResult
