@@ -19,4 +19,9 @@ class Grupo extends Model
         'user_created_id', 
         'user_updated_id'
     ];
+
+    public function acciones()
+    {
+        return $this->belongsToMany(Accion::class, 'accion_grupo');
+    }
 }

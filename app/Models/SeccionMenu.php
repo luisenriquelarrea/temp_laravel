@@ -27,4 +27,10 @@ class SeccionMenu extends Model
     {
         return $this->belongsTo(Menu::class);
     }
+
+    public function acciones()
+    {
+        return $this->hasMany(Accion::class);
+    }
+
 }

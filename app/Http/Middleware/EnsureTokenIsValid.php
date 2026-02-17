@@ -16,14 +16,18 @@ class EnsureTokenIsValid
      * 
      * @return  \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next){
-        $request_token = (string)$request->input('token');
-        $user = User::select('users.id', 'users.name', 'users.remember_token')
-            ->where('users.remember_token', '=', $request_token)
-            ->get()
-            ->toArray();
-        if(sizeof($user) === 0)
-            return response()->json(['message' => 'Error token invalido'], 500);
+    public function handle(Request $request, Closure $next)
+    {
+        $request_token = $request->bearerToken();
+
+        if (!$request_token)
+            return response()->json(['message' => 'Token requerido'], 401);
+
+        $user = User::where('remember_token', $request_token)->first();
+
+        if (!$user)
+            return response()->json(['message' => 'Token invalido'], 401);
+
         return $next($request);
     }
 }

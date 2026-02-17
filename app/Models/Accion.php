@@ -27,6 +27,11 @@ class Accion extends Model
         'user_updated_id'
     ];
 
+    public function grupos()
+    {
+        return $this->belongsToMany(Grupo::class, 'accion_grupo');
+    }
+
     public function seccionMenu()
     {
         return $this->belongsTo(SeccionMenu::class);

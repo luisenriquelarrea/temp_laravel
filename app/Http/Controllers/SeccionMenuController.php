@@ -4,10 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\SeccionMenu;
 use App\Http\Filters\SeccionMenuFilter;
+use App\Services\SeccionMenuService;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SeccionMenuController extends Controller
 {
+    protected $service;
+
+    public function __construct(SeccionMenuService $service)
+    {
+        $this->service = $service;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -27,8 +36,14 @@ class SeccionMenuController extends Controller
      */
     public function store(Request $request)
     {
-        $record = SeccionMenu::create($request->all());
-        return response()->json($record, 201);
+        return DB::transaction(function () use ($request) {
+
+            $seccion = $this->service->deploy_accion_grupo(
+                $request->all()
+            );
+
+            return response()->json($seccion, 201);
+        });
     }
 
     /**
