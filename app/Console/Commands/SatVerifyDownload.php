@@ -88,8 +88,16 @@ class SatVerifyDownload extends Command
 
         $this->info("Se encontraron {$verify->countPackages()} paquetes");
 
-        foreach ($verify->getPackagesIds() as $packageId) {
-            $this->line(" > {$packageId}");
+        $results = $this->service->downloadRequest($verify->getPackagesIds());
+
+        foreach ($results as $packageId => $result) {
+
+            if (! $result['success']) {
+                $this->error("Error en {$packageId}: {$result['message']}");
+                continue;
+            }
+
+            $this->info("Paquete {$packageId} descargado correctamente");
         }
 
         return 0;

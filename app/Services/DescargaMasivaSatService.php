@@ -99,22 +99,37 @@ class DescargaMasivaSatService
         return $result;
     }
 
-    public function downloadPackage(string $packageId): void
+    public function downloadRequest(array $packagesIds): array
     {
         $service = $this->createService();
 
-        $download = $service->download($packageId);
+        $results = [];
 
-        if (!$download->getStatus()->isAccepted()) {
-            throw new RuntimeException(
-                "No se pudo descargar paquete {$packageId}: " .
-                $download->getStatus()->getMessage()
+        foreach ($packagesIds as $packageId) {
+
+            $download = $service->download($packageId);
+
+            if (! $download->getStatus()->isAccepted()) {
+                $results[$packageId] = [
+                    'success' => false,
+                    'message' => $download->getStatus()->getMessage(),
+                ];
+                continue;
+            }
+
+            Storage::makeDirectory('sat');
+
+            Storage::put(
+                "sat/{$packageId}.zip",
+                $download->getPackageContent()
             );
+
+            $results[$packageId] = [
+                'success' => true,
+                'message' => 'Downloaded successfully',
+            ];
         }
 
-        Storage::put(
-            "sat/{$packageId}.zip",
-            $download->getPackageContent()
-        );
+        return $results;
     }
 }
