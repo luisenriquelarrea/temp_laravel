@@ -48,11 +48,5 @@ class SatCreateDownload extends Command
         );
 
         $this->info("Solicitud creada: {$requestId}");
-
-        /*SatDownloadRequest::create([
-            'request_id' => $requestId,
-            'status' => 'pending'
-        ]);*/
-
     }
 }
