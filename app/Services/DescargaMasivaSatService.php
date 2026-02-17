@@ -8,6 +8,7 @@ use PhpCfdi\SatWsDescargaMasiva\RequestBuilder\FielRequestBuilder\Fiel;
 use PhpCfdi\SatWsDescargaMasiva\RequestBuilder\FielRequestBuilder\FielRequestBuilder;
 use PhpCfdi\SatWsDescargaMasiva\Service;
 use PhpCfdi\SatWsDescargaMasiva\Services\Query\QueryParameters;
+use PhpCfdi\SatWsDescargaMasiva\Services\Verify\VerifyResult;
 use PhpCfdi\SatWsDescargaMasiva\Shared\DateTimePeriod;
 use PhpCfdi\SatWsDescargaMasiva\Shared\DocumentStatus;
 use PhpCfdi\SatWsDescargaMasiva\Shared\DocumentType;
@@ -89,22 +90,13 @@ class DescargaMasivaSatService
         return $query->getRequestId();
     }
 
-    public function verifyRequest(string $requestId): array
+    public function verifyRequest(string $requestId): VerifyResult
     {
         $service = $this->createService();
 
-        $verify = $service->verify($requestId);
+        $result = $service->verify($requestId);
 
-        if (!$verify->getStatus()->isAccepted()) {
-            throw new RuntimeException(
-                'Error al verificar solicitud: ' . $verify->getStatus()->getMessage()
-            );
-        }
-
-        return [
-            'finished' => $verify->getStatusRequest()->isFinished(),
-            'packages' => $verify->getPackagesIds(),
-        ];
+        return $result;
     }
 
     public function downloadPackage(string $packageId): void
