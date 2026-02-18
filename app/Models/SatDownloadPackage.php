@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SatDownloadPackage extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'sat_download_request_id',
+        'package_id',
+        'status',
+        'error_message'
+    ];
 }

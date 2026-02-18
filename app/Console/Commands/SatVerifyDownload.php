@@ -3,8 +3,12 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 use App\Services\DescargaMasivaSatService;
+
+use App\Models\SatDownloadPackage;
+use App\Models\SatDownloadRequest;
 
 class SatVerifyDownload extends Command
 {
@@ -21,7 +25,7 @@ class SatVerifyDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sat-verify-download {requestId}';
+    protected $signature = 'app:sat-verify-download';
 
     /**
      * The console command description.
@@ -35,70 +39,206 @@ class SatVerifyDownload extends Command
      */
     public function handle()
     {
-        $requestId = $this->argument('requestId');
+        $request = null;
+
+        /**
+         * STEP 1: Safely fetch one pending request
+         */
+        DB::transaction(function () use (&$request) {
+            $request = SatDownloadRequest::whereIn('status', [
+                'created',
+                'accepted',
+                'in_progress',
+                'finished' // allow resume if needed
+            ])
+            ->where(function ($query) {
+                $query->whereNull('last_verified_at')
+                      ->orWhere('last_verified_at', '<', now()->subMinutes(5));
+            })
+            ->lockForUpdate()
+            ->orderBy('created_at')
+            ->first();
+
+            if ($request) {
+                $request->update([
+                    'last_verified_at' => now()
+                ]);
+            }
+        });
+
+        if (! $request) {
+            $this->info('No pending SAT requests.');
+            return 0;
+        }
+
+        $requestId = $request->request_id;
 
         $this->info("Verificando solicitud: {$requestId}");
 
+        /**
+         * STEP 2: Verify request with SAT
+         */
         $verify = $this->service->verifyRequest($requestId);
 
-        // Verificación SOAP correcta
+        // SOAP validation
         if (! $verify->getStatus()->isAccepted()) {
-            $this->error(
-                "Fallo al verificar la consulta {$requestId}: " .
-                $verify->getStatus()->getMessage()
-            );
+
+            $message = "Fallo al verificar {$requestId}: " .
+                $verify->getStatus()->getMessage();
+
+            $request->update([
+                'status' => 'failed',
+                'error_message' => $message
+            ]);
+
+            $this->error($message);
             return 1;
         }
 
-        // SAT rechazó la solicitud
         if (! $verify->getCodeRequest()->isAccepted()) {
-            $this->error(
-                "La solicitud {$requestId} fue rechazada: " .
-                $verify->getCodeRequest()->getMessage()
-            );
+
+            $message = "Solicitud {$requestId} rechazada: " .
+                $verify->getCodeRequest()->getMessage();
+
+            $request->update([
+                'status' => 'rejected',
+                'error_message' => $message
+            ]);
+
+            $this->error($message);
             return 1;
         }
 
-        // Estado del proceso
         $statusRequest = $verify->getStatusRequest();
 
+        /**
+         * STEP 3: Handle SAT state machine
+         */
         if ($statusRequest->isExpired()) {
-            $this->error("La solicitud {$requestId} expiró.");
-            return;
+
+            $message = "La solicitud {$requestId} expiró.";
+
+            $request->update([
+                'status' => 'failed',
+                'error_message' => $message
+            ]);
+
+            $this->error($message);
+            return 0;
         }
 
         if ($statusRequest->isFailure()) {
-            $this->error("La solicitud {$requestId} falló.");
-            return;
+
+            $message = "La solicitud {$requestId} falló.";
+
+            $request->update([
+                'status' => 'failed',
+                'error_message' => $message
+            ]);
+
+            $this->error($message);
+            return 0;
         }
 
         if ($statusRequest->isRejected()) {
-            $this->error("La solicitud {$requestId} fue rechazada por SAT.");
-            return;
+
+            $message = "La solicitud {$requestId} fue rechazada por SAT.";
+
+            $request->update([
+                'status' => 'rejected',
+                'error_message' => $message
+            ]);
+
+            $this->error($message);
+            return 0;
         }
 
-        if ($statusRequest->isInProgress() || $statusRequest->isAccepted()) {
+        if ($statusRequest->isInProgress()) {
+
+            $request->update(['status' => 'in_progress']);
+
             $this->warn("La solicitud {$requestId} se está procesando...");
-            return;
+            return 0;
         }
 
-        if ($statusRequest->isFinished()) {
-            $this->info("La solicitud {$requestId} está lista.");
+        if ($statusRequest->isAccepted()) {
+
+            $request->update(['status' => 'accepted']);
+
+            $this->warn("La solicitud {$requestId} fue aceptada y está en proceso...");
+            return 0;
         }
 
-        $this->info("Se encontraron {$verify->countPackages()} paquetes");
+        /**
+         * STEP 4: Finished → Download packages
+         */
+        if (! $statusRequest->isFinished()) {
+            return 0;
+        }
 
+        $packagesCount = $verify->countPackages();
+
+        $request->update([
+            'status' => 'finished',
+            'packages_count' => $packagesCount,
+        ]);
+
+        $this->info("Solicitud {$requestId} lista.");
+        $this->info("Se encontraron {$packagesCount} paquetes.");
+
+        // If already completed, skip
+        if (in_array($request->status, ['completed', 'partial'])) {
+            return 0;
+        }
+
+        /**
+         * STEP 5: Download packages safely
+         */
         $results = $this->service->downloadRequest($verify->getPackagesIds());
 
         foreach ($results as $packageId => $result) {
 
+            $data = [
+                'sat_download_request_id' => $request->id,
+                'package_id' => $packageId,
+            ];
+
             if (! $result['success']) {
-                $this->error("Error en {$packageId}: {$result['message']}");
+
+                $message = "Error en {$packageId}: {$result['message']}";
+
+                $data['status'] = 'failed';
+                $data['error_message'] = $message;
+
+                SatDownloadPackage::updateOrCreate(
+                    ['package_id' => $packageId],
+                    $data
+                );
+
+                $this->error($message);
                 continue;
             }
 
+            $data['status'] = 'downloaded';
+
+            SatDownloadPackage::updateOrCreate(
+                ['package_id' => $packageId],
+                $data
+            );
+
             $this->info("Paquete {$packageId} descargado correctamente");
         }
+
+        /**
+         * STEP 6: Final state resolution
+         */
+        $failedCount = SatDownloadPackage::where('sat_download_request_id', $request->id)
+            ->where('status', 'failed')
+            ->count();
+
+        $request->update([
+            'status' => $failedCount === 0 ? 'completed' : 'partial'
+        ]);
 
         return 0;
     }

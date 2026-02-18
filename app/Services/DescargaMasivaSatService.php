@@ -59,7 +59,6 @@ class DescargaMasivaSatService
 
         $webClient = new GuzzleWebClient($guzzle);
 
-        //$webClient = new GuzzleWebClient();
         $requestBuilder = new FielRequestBuilder($fiel);
 
         return new Service($requestBuilder, $webClient);
@@ -73,7 +72,7 @@ class DescargaMasivaSatService
      *   ->withDocumentType(DocumentType::ingreso())
      *   ->withComplement(ComplementoCfdi::leyendasFiscales10())
      *   ->withDocumentStatus(DocumentStatus::active())
-     *  ->withRfcOnBehalf(RfcOnBehalf::create('XXX01010199A'))
+     *   ->withRfcOnBehalf(RfcOnBehalf::create('XXX01010199A'))
      *   ->withRfcMatch(RfcMatch::create('MAG041126GT8'))
      *   ->withUuid(Uuid::create('96623061-61fe-49de-b298-c7156476aa8b'))
      */
@@ -86,7 +85,10 @@ class DescargaMasivaSatService
 
             $request = QueryParameters::create()
                 ->withPeriod(DateTimePeriod::createFromValues($start, $end))
-                ->withRequestType(RequestType::xml());
+                ->withRequestType(RequestType::xml())
+                ->withDocumentType(DocumentType::ingreso())
+                ->withDownloadType(DownloadType::received())
+                ->withDocumentStatus(DocumentStatus::active());
 
             $query = $service->query($request);
 
@@ -100,9 +102,9 @@ class DescargaMasivaSatService
 
             SatDownloadRequest::create([
                 'request_id' => $requestId,
-                'date_start' => $start,
-                'date_end' => $end,
-                'status' => 'CREATED',
+                'date_from' => $start,
+                'date_to' => $end,
+                'status' => 'created',
             ]);
 
             return $requestId;

@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+use Carbon\Carbon;
+
 use App\Services\DescargaMasivaSatService;
 
 class SatCreateDownload extends Command
@@ -35,16 +37,13 @@ class SatCreateDownload extends Command
      */
     public function handle()
     {
-        $this->info('Server timezone: ' . config('app.timezone'));
-        $this->info('PHP timezone: ' . date_default_timezone_get());
-        $this->info('Current PHP time: ' . now()->toDateTimeString());
-        $this->info('UTC time: ' . now()->utc()->toDateTimeString());
-
         $this->info('Iniciando solicitud SAT...');
 
+        $yesterday = Carbon::now('America/Mexico_City')->subDay();
+
         $requestId = $this->service->createRequest(
-            '2026-02-16 00:00:00',
-            '2026-02-16 23:59:59'
+            $yesterday->copy()->startOfDay()->format('Y-m-d H:i:s'),
+            $yesterday->copy()->endOfDay()->format('Y-m-d H:i:s')
         );
 
         $this->info("Solicitud creada: {$requestId}");

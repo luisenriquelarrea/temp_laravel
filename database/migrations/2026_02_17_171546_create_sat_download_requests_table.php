@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('sat_download_requests', function (Blueprint $table) {
             $table->id();
             $table->string('request_id')->nullable();
-            $table->string('rfc');
             $table->timestamp('date_from');
             $table->timestamp('date_to');
 
@@ -25,6 +24,8 @@ return new class extends Migration
             $table->text('error_message')->nullable();
 
             $table->timestamps();
+
+            $table->timestamp('last_verified_at')->nullable();
         });
     }
 
