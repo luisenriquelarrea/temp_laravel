@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('date_to');
 
             $table->string('status')->default('created'); 
-            // created | accepted | in_progress | finished | failed | rejected
+            // created | accepted | in_progress | finished | completed | failed | rejected
 
             $table->integer('packages_count')->nullable();
             $table->text('error_message')->nullable();

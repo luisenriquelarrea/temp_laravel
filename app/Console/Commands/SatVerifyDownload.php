@@ -49,7 +49,7 @@ class SatVerifyDownload extends Command
                 'created',
                 'accepted',
                 'in_progress',
-                'finished' // allow resume if needed
+                'finished'
             ])
             ->where(function ($query) {
                 $query->whereNull('last_verified_at')
@@ -186,7 +186,6 @@ class SatVerifyDownload extends Command
         $this->info("Solicitud {$requestId} lista.");
         $this->info("Se encontraron {$packagesCount} paquetes.");
 
-        // If already completed, skip
         if (in_array($request->status, ['completed', 'partial'])) {
             return 0;
         }

@@ -18,7 +18,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\EnsureTokenIsValid::class,
     ];
 
     /**
@@ -42,6 +41,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\TransformApiResponse::class,
             \App\Http\Middleware\TransformForeignKeys::class,
+            \App\Http\Middleware\EnsureTokenIsValid::class,
         ],
     ];
 
