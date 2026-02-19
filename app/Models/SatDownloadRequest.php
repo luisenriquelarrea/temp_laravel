@@ -14,4 +14,10 @@ class SatDownloadRequest extends Model
         'packages_count',
         'last_verified_at',
     ];
+
+    protected $casts = [
+        'date_from' => 'datetime',
+        'date_to' => 'datetime',
+        'last_verified_at' => 'datetime',
+    ];
 }
