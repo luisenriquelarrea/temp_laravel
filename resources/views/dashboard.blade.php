@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('SAT | Servicio de descarga masiva') }}
         </h2>
     </x-slot>
 
@@ -15,24 +15,24 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
-                <h2 class="text-xl font-bold mb-4">SAT Download Requests</h2>
+                <h2 class="text-xl font-bold mb-4">Solicitudes de descarga</h2>
 
                 <a href="{{ route('sat-requests.create') }}"
                     class="bg-blue-600 text-white px-4 py-2 rounded mb-4 inline-block">
-                    New Request
+                    Nueva solicitud
                 </a>
 
                 <table class="min-w-full border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="border px-4 py-2">Actions</th>
+                            <th class="border px-4 py-2">Acciones</th>
                             <th class="p-2 border">ID</th>
-                            <th class="p-2 border">Request ID</th>
-                            <th class="p-2 border">From</th>
-                            <th class="p-2 border">To</th>
-                            <th class="p-2 border">Status</th>
-                            <th class="p-2 border">Packages</th>
-                            <th class="p-2 border">Last Verified</th>
+                            <th class="p-2 border">Solicitud ID</th>
+                            <th class="p-2 border">Inicio</th>
+                            <th class="p-2 border">Final</th>
+                            <th class="p-2 border">Estatus</th>
+                            <th class="p-2 border">Paquetes</th>
+                            <th class="p-2 border">Ultima consulta</th>
                         </tr>
                     </thead>
                     <tbody>
