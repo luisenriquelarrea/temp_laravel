@@ -5,6 +5,8 @@ namespace App\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+use Carbon\Carbon;
+
 use App\Models\SatDownloadRequest;
 
 use PhpCfdi\SatWsDescargaMasiva\RequestBuilder\FielRequestBuilder\Fiel;
@@ -104,6 +106,50 @@ class DescargaMasivaSatService
                 'request_id' => $requestId,
                 'date_from' => $start,
                 'date_to' => $end,
+                'status' => 'created',
+            ]);
+
+            return $requestId;
+        });
+    }
+
+    public function createCustomRequest(array $params): string
+    {
+        return DB::transaction(function () use ($params) {
+
+            $service = $this->createService();
+
+            $dateFrom = Carbon::parse($params['date_from'])
+                ->startOfDay()
+                ->format('Y-m-d H:i:s');
+
+            $dateTo = Carbon::parse($params['date_to'])
+                ->endOfDay()
+                ->format('Y-m-d H:i:s');
+
+            $request = QueryParameters::create()
+                ->withPeriod(
+                    DateTimePeriod::createFromValues($dateFrom, $dateTo)
+                )
+                ->withDownloadType(DownloadType::{$params['download_type']}())
+                ->withRequestType(RequestType::{$params['request_type']}())
+                ->withDocumentType(DocumentType::{$params['document_type']}())
+                ->withDocumentStatus(DocumentStatus::{$params['document_status']}());
+
+            $query = $service->query($request);
+
+            if (!$query->getStatus()->isAccepted()) {
+                throw new RuntimeException(
+                    'Error al crear solicitud: ' . $query->getStatus()->getMessage()
+                );
+            }
+
+            $requestId = $query->getRequestId();
+
+            SatDownloadRequest::create([
+                'request_id' => $requestId,
+                'date_from' => $params['date_from'],
+                'date_to' => $params['date_to'],
                 'status' => 'created',
             ]);
 
