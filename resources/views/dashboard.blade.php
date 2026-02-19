@@ -25,6 +25,7 @@
                 <table class="min-w-full border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
+                            <th class="border px-4 py-2">Actions</th>
                             <th class="p-2 border">ID</th>
                             <th class="p-2 border">Request ID</th>
                             <th class="p-2 border">From</th>
@@ -37,6 +38,19 @@
                     <tbody>
                         @forelse($requests as $request)
                             <tr>
+                                <td class="border px-4 py-2 text-center">
+                                    @if($request->packages->isNotEmpty())
+                                        @foreach($request->packages as $package)
+                                            <a href="{{ route('sat-packages.download', $package) }}"
+                                            class="text-blue-600 hover:text-green-800 mr-2"
+                                            title="Download {{ $package->package_id }}">
+                                                <i class="fa-solid fa-file-zipper text-lg"></i>
+                                            </a>
+                                        @endforeach
+                                    @else
+                                        <span class="text-gray-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="p-2 border">{{ $request->id }}</td>
                                 <td class="p-2 border">{{ $request->request_id }}</td>
                                 <td class="p-2 border">{{ $request->date_from }}</td>

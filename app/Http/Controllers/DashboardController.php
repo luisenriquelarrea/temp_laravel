@@ -8,7 +8,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $requests = SatDownloadRequest::latest()->paginate(10);
+        $requests = SatDownloadRequest::with('packages')
+            ->latest()
+            ->paginate(10);
 
         return view('dashboard', compact('requests'));
     }

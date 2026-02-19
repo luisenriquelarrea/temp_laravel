@@ -12,4 +12,9 @@ class SatDownloadPackage extends Model
         'status',
         'error_message'
     ];
+
+    public function request()
+    {
+        return $this->belongsTo(SatDownloadRequest::class);
+    }
 }

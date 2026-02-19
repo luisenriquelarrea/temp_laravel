@@ -20,4 +20,9 @@ class SatDownloadRequest extends Model
         'date_to' => 'datetime',
         'last_verified_at' => 'datetime',
     ];
+
+    public function packages()
+    {
+        return $this->hasMany(SatDownloadPackage::class);
+    }
 }

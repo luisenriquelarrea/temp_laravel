@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+use App\Models\SatDownloadPackage;
 
 use App\Services\DescargaMasivaSatService;
 
@@ -17,6 +20,16 @@ class SatDownloadRequestController extends Controller
     public function create()
     {
         return view('sat_requests.create');
+    }
+
+    public function downloadPackage(SatDownloadPackage $package)
+    {
+        $path = "sat/{$package->package_id}.zip";
+
+        if (!Storage::exists($path))
+            abort(404, 'File not found');
+
+        return Storage::download($path);
     }
 
     public function store(Request $request)
