@@ -55,7 +55,56 @@
                                 <td class="p-2 border">{{ $request->request_id }}</td>
                                 <td class="p-2 border">{{ $request->date_from }}</td>
                                 <td class="p-2 border">{{ $request->date_to }}</td>
-                                <td class="p-2 border">{{ $request->status }}</td>
+                                <td class="p-2 border text-center">
+                                    @switch($request->status)
+                                        @case('created')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-800">
+                                                Created
+                                            </span>
+                                            @break
+
+                                        @case('accepted')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-blue-200 text-blue-800">
+                                                Accepted
+                                            </span>
+                                            @break
+
+                                        @case('in_progress')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-yellow-200 text-yellow-800">
+                                                In Progress
+                                            </span>
+                                            @break
+
+                                        @case('finished')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-indigo-200 text-indigo-800">
+                                                Finished
+                                            </span>
+                                            @break
+
+                                        @case('completed')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-green-200 text-green-800">
+                                                Completed
+                                            </span>
+                                            @break
+
+                                        @case('failed')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-red-200 text-red-800">
+                                                Failed
+                                            </span>
+                                            @break
+
+                                        @case('rejected')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-red-300 text-red-900">
+                                                Rejected
+                                            </span>
+                                            @break
+
+                                        @default
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-600">
+                                                {{ $request->status }}
+                                            </span>
+                                    @endswitch
+                                </td>
                                 <td class="p-2 border">{{ $request->packages_count }}</td>
                                 <td class="p-2 border">{{ $request->last_verified_at }}</td>
                             </tr>
