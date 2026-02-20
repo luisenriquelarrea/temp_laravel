@@ -30,4 +30,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'springboot' => [
+        'base_url' => env('SPRING_API_URL'),
+        'api_key'  => env('SPRING_API_KEY'),
+        'api_token'  => env('SPRING_API_TOKEN'),
+    ],
 ];
