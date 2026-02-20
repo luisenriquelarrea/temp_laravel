@@ -10,11 +10,15 @@ class SatDownloadPackage extends Model
         'sat_download_request_id',
         'package_id',
         'status',
+        'is_copied',
         'error_message'
     ];
 
     public function request()
     {
-        return $this->belongsTo(SatDownloadRequest::class);
+        return $this->belongsTo(
+            SatDownloadRequest::class,
+            'sat_download_request_id'
+        );
     }
 }
