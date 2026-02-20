@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
+use Carbon\Carbon;
+
 use App\Models\SatDownloadRequest;
 
 class CopyPackagesToServer extends Command
@@ -15,7 +17,7 @@ class CopyPackagesToServer extends Command
      *
      * @var string
      */
-    protected $signature = 'app:copy-packages-to-server';
+    protected $signature = 'app:copy-packages-to-server {date?}';
 
     /**
      * The console command description.
@@ -29,12 +31,20 @@ class CopyPackagesToServer extends Command
      */
     public function handle()
     {
-        $yesterdayStart = now()->subDay()->startOfDay();
-        $yesterdayEnd   = now()->subDay()->endOfDay();
+        $inputDate = $this->argument('date');
+
+        $date = $inputDate
+            ? Carbon::parse($inputDate)
+            : now()->subDay();
+
+        $start = $date->copy()->startOfDay();
+        $end   = $date->copy()->endOfDay();
+
+        $this->info("Copying ZIP from: " . $date->toDateString());
 
         $requests = SatDownloadRequest::where('status', 'completed')
             ->where('is_cron_request', true)
-            ->whereBetween('date_from', [$yesterdayStart, $yesterdayEnd])
+            ->whereBetween('date_from', [$start, $end])
             ->get();
 
         foreach ($requests as $request) {
