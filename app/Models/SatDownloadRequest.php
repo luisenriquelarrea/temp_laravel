@@ -13,9 +13,11 @@ class SatDownloadRequest extends Model
         'status',
         'packages_count',
         'last_verified_at',
+        'is_cron_request'
     ];
 
     protected $casts = [
+        'is_cron_request' => 'boolean',
         'date_from' => 'datetime',
         'date_to' => 'datetime',
         'last_verified_at' => 'datetime',

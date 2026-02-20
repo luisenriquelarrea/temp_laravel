@@ -107,6 +107,7 @@ class DescargaMasivaSatService
                 'date_from' => $start,
                 'date_to' => $end,
                 'status' => 'created',
+                'is_cron_request' => true
             ]);
 
             return $requestId;
