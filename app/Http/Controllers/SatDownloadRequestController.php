@@ -46,6 +46,6 @@ class SatDownloadRequestController extends Controller
         $requestId = $this->descargaMasivaService->createCustomRequest(params: $validated);
 
         return redirect()->route('dashboard')
-            ->with('success', "Download request created {$requestId}");
+            ->with('success', "Solicitud de descarga creada {$requestId}");
     }
 }

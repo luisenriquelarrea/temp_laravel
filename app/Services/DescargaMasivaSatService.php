@@ -125,7 +125,7 @@ class DescargaMasivaSatService
 
             $dateTo = Carbon::parse($params['date_to'])
                 ->endOfDay()
-                ->format('Y-m-d H:i:s');
+                ->format(format: 'Y-m-d H:i:s');
 
             $request = QueryParameters::create()
                 ->withPeriod(
@@ -148,8 +148,8 @@ class DescargaMasivaSatService
 
             SatDownloadRequest::create([
                 'request_id' => $requestId,
-                'date_from' => $params['date_from'],
-                'date_to' => $params['date_to'],
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
                 'status' => 'created',
             ]);
 
