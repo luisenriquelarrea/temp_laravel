@@ -10,6 +10,8 @@ use Carbon\Carbon;
 
 use App\Models\SatDownloadPackage;
 
+use App\Services\TelegramService;
+
 class CopyPackagesToServer extends Command
 {
     /**
@@ -61,6 +63,8 @@ class CopyPackagesToServer extends Command
             return 0;
         }
 
+        $message_script = "";
+
         foreach ($packages as $package) {
             $path = "sat/{$package->package_id}.zip";
 
@@ -94,10 +98,23 @@ class CopyPackagesToServer extends Command
                 $package->update([
                     'is_copied' => true,
                 ]);
-                $this->info("Copied package {$package->package_id}");
-            } else
-                $this->error("Failed copying package {$package->package_id}");
+
+                $message = "Copied package {$package->package_id}";
+
+                $message_script .="{$message}\n";
+
+                $this->info($message);
+            } else{
+                $message = "Failed copying package {$package->package_id}";
+
+                $message_script .="{$message}\n";
+
+                $this->error($message);
+            }
         }
+
+        app(TelegramService::class)
+            ->notify_from_server($message_script);
         
         return 0;
     }

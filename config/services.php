@@ -30,6 +30,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sat' => [
+        'passw' => env('WSSAT_KEY_PASSWORD'),
+    ],
+
+    'telegram' => [
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT'),
+    ],
+
     'springboot' => [
         'base_url' => env('SPRING_API_URL'),
         'api_key'  => env('SPRING_API_KEY'),

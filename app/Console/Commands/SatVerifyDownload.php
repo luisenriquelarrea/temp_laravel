@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 use App\Services\DescargaMasivaSatService;
+use App\Services\TelegramService;
 
 use App\Models\SatDownloadPackage;
 use App\Models\SatDownloadRequest;
@@ -91,6 +92,9 @@ class SatVerifyDownload extends Command
                 'error_message' => $message
             ]);
 
+            app(TelegramService::class)
+                ->notify_from_server($message);
+
             $this->error($message);
             return 1;
         }
@@ -104,6 +108,9 @@ class SatVerifyDownload extends Command
                 'status' => 'rejected',
                 'error_message' => $message
             ]);
+
+            app(TelegramService::class)
+                ->notify_from_server($message);
 
             $this->error($message);
             return 1;
@@ -123,6 +130,9 @@ class SatVerifyDownload extends Command
                 'error_message' => $message
             ]);
 
+            app(TelegramService::class)
+                ->notify_from_server($message);
+
             $this->error($message);
             return 0;
         }
@@ -135,6 +145,9 @@ class SatVerifyDownload extends Command
                 'status' => 'failed',
                 'error_message' => $message
             ]);
+
+            app(TelegramService::class)
+                ->notify_from_server($message);
 
             $this->error($message);
             return 0;
@@ -149,6 +162,9 @@ class SatVerifyDownload extends Command
                 'error_message' => $message
             ]);
 
+            app(TelegramService::class)
+                ->notify_from_server($message);
+
             $this->error($message);
             return 0;
         }
@@ -157,7 +173,12 @@ class SatVerifyDownload extends Command
 
             $request->update(['status' => 'in_progress']);
 
-            $this->warn("La solicitud {$requestId} se está procesando...");
+            $message = "La solicitud {$requestId} se está procesando...";
+
+            app(TelegramService::class)
+                ->notify_from_server($message);
+
+            $this->warn($message);
             return 0;
         }
 
@@ -165,7 +186,12 @@ class SatVerifyDownload extends Command
 
             $request->update(['status' => 'accepted']);
 
-            $this->warn("La solicitud {$requestId} fue aceptada y está en proceso...");
+            $message = "La solicitud {$requestId} fue aceptada y está en proceso...";
+
+            app(TelegramService::class)
+                ->notify_from_server($message);
+
+            $this->warn($message);
             return 0;
         }
 
@@ -194,6 +220,8 @@ class SatVerifyDownload extends Command
          * STEP 5: Download packages safely
          */
         $results = $this->service->downloadRequest($verify->getPackagesIds());
+
+        $downladedPackages = "";
 
         foreach ($results as $packageId => $result) {
 
@@ -225,8 +253,14 @@ class SatVerifyDownload extends Command
                 $data
             );
 
-            $this->info("Paquete {$packageId} descargado correctamente");
+            $message = "Paquete {$packageId} descargado correctamente";
+            $downladedPackages .= "{$message}\n";
+
+            $this->info($message);
         }
+
+        app(TelegramService::class)
+            ->notify_from_server($downladedPackages);
 
         /**
          * STEP 6: Final state resolution

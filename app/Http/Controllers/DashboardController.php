@@ -9,7 +9,7 @@ class DashboardController extends Controller
     public function index()
     {
         $requests = SatDownloadRequest::with('packages')
-            ->latest()
+            ->orderBy('date_from', 'desc')
             ->paginate(10);
 
         return view('dashboard', compact('requests'));

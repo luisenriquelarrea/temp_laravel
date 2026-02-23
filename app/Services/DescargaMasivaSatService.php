@@ -35,7 +35,7 @@ class DescargaMasivaSatService
     {
         $this->cert = storage_path('app/ssl/certificado.cer');
         $this->key = storage_path('app/ssl/claveprivada.key');
-        $this->password = config('wssat.passw');
+        $this->password = config('services.sat.passw');
     }
 
     private function createService(): Service
@@ -95,9 +95,12 @@ class DescargaMasivaSatService
             $query = $service->query($request);
 
             if (!$query->getStatus()->isAccepted()) {
-                throw new RuntimeException(
-                    'Error al crear solicitud: ' . $query->getStatus()->getMessage()
-                );
+                $message = 'Error al crear solicitud: ' . $query->getStatus()->getMessage();
+
+                app(TelegramService::class)
+                    ->notify_from_server($message);
+                
+                throw new RuntimeException($message);
             }
 
             $requestId = $query->getRequestId();
