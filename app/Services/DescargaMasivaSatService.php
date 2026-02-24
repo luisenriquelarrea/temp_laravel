@@ -96,15 +96,7 @@ class DescargaMasivaSatService
         if ($options['document_status'] === 'cancelled') 
             $options['request_type'] = 'metadata';
 
-        return QueryParameters::create()
-            ->withPeriod(DateTimePeriod::createFromValues(
-                $options['start'],
-                $options['end']
-            ))
-            ->withDownloadType(DownloadType::{$options['download_type']}())
-            ->withRequestType(RequestType::{$options['request_type']}())
-            ->withDocumentType(DocumentType::{$options['document_type']}())
-            ->withDocumentStatus(DocumentStatus::{$options['document_status']}());
+        return $options;
     }
 
     public function createRequest(array $options): string
@@ -113,7 +105,17 @@ class DescargaMasivaSatService
 
             $service = $this->createService();
 
-            $request = $this->getQueryParameters($options);
+            $options = $this->getQueryParameters($options);
+
+            $request = QueryParameters::create()
+                ->withPeriod(DateTimePeriod::createFromValues(
+                    $options['start'],
+                    $options['end']
+                ))
+                ->withDownloadType(DownloadType::{$options['download_type']}())
+                ->withRequestType(RequestType::{$options['request_type']}())
+                ->withDocumentType(DocumentType::{$options['document_type']}())
+                ->withDocumentStatus(DocumentStatus::{$options['document_status']}());
 
             $query = $service->query($request);
 
@@ -133,6 +135,7 @@ class DescargaMasivaSatService
                 'date_from' => $options['start'],
                 'date_to' => $options['end'],
                 'status' => 'created',
+                'document_status' => $options['document_status'],
                 'is_cron_request' => $options['is_cron_request']
             ]);
 

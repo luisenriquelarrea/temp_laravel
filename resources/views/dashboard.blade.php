@@ -27,6 +27,7 @@
                         <tr class="bg-gray-100">
                             <th class="border px-4 py-2">Acciones</th>
                             <th class="p-2 border">ID</th>
+                            <th class="p-2 border">Estatus CFDI</th>
                             <th class="p-2 border">Solicitud ID</th>
                             <th class="p-2 border">Inicio</th>
                             <th class="p-2 border">Final</th>
@@ -52,6 +53,21 @@
                                     @endif
                                 </td>
                                 <td class="p-2 border">{{ $request->id }}</td>
+                                <td class="p-2 border text-center">
+                                    @switch($request->document_status)
+                                        @case('cancelled')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-red-200 text-red-800">
+                                                cancelled
+                                            </span>
+                                            @break
+                                        
+                                        @case('active')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-green-200 text-green-800">
+                                                active
+                                            </span>
+                                            @break
+                                    @endswitch
+                                </td>
                                 <td class="p-2 border">{{ $request->request_id }}</td>
                                 <td class="p-2 border">{{ $request->date_from }}</td>
                                 <td class="p-2 border">{{ $request->date_to }}</td>
