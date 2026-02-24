@@ -11,7 +11,7 @@
                     <!-- Date From -->
                     <div class="mb-4">
                         <label class="block font-medium">Fecha inicio</label>
-                        <input type="date" name="date_from"
+                        <input type="date" name="start"
                             class="w-full border rounded p-2"
                             required>
                     </div>
@@ -19,7 +19,7 @@
                     <!-- Date To -->
                     <div class="mb-4">
                         <label class="block font-medium">Fecha final</label>
-                        <input type="date" name="date_to"
+                        <input type="date" name="end"
                             class="w-full border rounded p-2"
                             required>
                     </div>

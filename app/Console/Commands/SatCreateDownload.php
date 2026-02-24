@@ -51,12 +51,16 @@ class SatCreateDownload extends Command
         else
             $date = Carbon::now('America/Mexico_City')->subDay();
 
+        $start = $date->copy()->startOfDay()->format('Y-m-d H:i:s');
+        $end = $date->copy()->endOfDay()->format('Y-m-d H:i:s');
+
         $this->info('Iniciando solicitud SAT from: ' . $date->toDateString());
 
-        $requestId = $this->service->createRequest(
-            $date->copy()->startOfDay()->format('Y-m-d H:i:s'),
-            $date->copy()->endOfDay()->format('Y-m-d H:i:s')
-        );
+        $requestId = $this->service->createRequest([
+            'start' => $start,
+            'end' => $end,
+            'is_cron_request' => true
+        ]);
 
         $message = "Solicitud creada: {$requestId}";
 
