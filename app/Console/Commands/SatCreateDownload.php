@@ -24,7 +24,9 @@ class SatCreateDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sat-create-download {date?}';
+    protected $signature = 'app:sat-create-download
+                        {date?}
+                        {--limitReached : Randomize seconds to avoid duplicate lifetime limit}';
 
     /**
      * The console command description.
@@ -51,8 +53,16 @@ class SatCreateDownload extends Command
         else
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-        $start = $date->copy()->startOfDay()->format('Y-m-d H:i:s');
-        $end = $date->copy()->endOfDay()->format('Y-m-d H:i:s');
+        $start = $date->copy()->startOfDay();
+        $end = $date->copy()->endOfDay();
+
+        if ($this->option('limitReached')) {
+            $randomEndSecond = random_int(0, 58);
+            $end->setSecond($randomEndSecond);
+        }
+
+        $start = $start->format('Y-m-d H:i:s');
+        $end = $end->format('Y-m-d H:i:s');
 
         $this->info('Iniciando solicitud SAT from: ' . $date->toDateString());
 
