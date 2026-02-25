@@ -44,17 +44,24 @@ class SatCreateDownload extends Command
 
         if ($inputDate) {
             try {
-                $date = Carbon::createFromFormat('Y-m-d', $inputDate);
+                $date = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $inputDate,
+                    'America/Mexico_City'
+                );
+
+                $start = $date->copy()->startOfDay();
+                $end   = $date->copy()->endOfDay();
             } catch (\Exception $e) {
                 $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
                 return 1;
             }
-        }
-        else
+        } else {
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-        $start = $date->copy()->startOfDay();
-        $end = $date->copy()->endOfDay();
+            $start = $date->copy()->subDays(3)->startOfDay();
+            $end   = $date->copy()->endOfDay();
+        }
 
         if ($this->option('limitReached')) {
             $randomEndSecond = random_int(0, 58);
