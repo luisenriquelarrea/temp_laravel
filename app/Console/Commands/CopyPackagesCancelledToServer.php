@@ -35,15 +35,14 @@ class CopyPackagesCancelledToServer extends Command
     {
         $inputDate = $this->argument('date');
 
-        if ($inputDate) {
-            try {
-                $date = Carbon::createFromFormat('Y-m-d', $inputDate);
-            } catch (\Exception $e) {
-                $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
-                return 1;
-            }
-        } else 
-            $date = now()->subDay();
+        try {
+            $date = $inputDate
+                ? Carbon::createFromFormat('Y-m-d', $inputDate, 'America/Mexico_City')
+                : Carbon::now('America/Mexico_City');
+        } catch (\Exception $e) {
+            $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
+            return 1;
+        }
 
         $start = $date->copy()->startOfDay();
         $end   = $date->copy()->endOfDay();
@@ -54,7 +53,7 @@ class CopyPackagesCancelledToServer extends Command
             $query->where('status', 'completed')
                 ->where('document_status', 'cancelled')
                 ->where('is_cron_request', true)
-                ->whereBetween('date_from', [$start, $end]);
+                ->whereBetween('created_at', [$start, $end]);
         })
         ->where('is_copied', false)
         ->get();
