@@ -84,7 +84,7 @@ class SatVerifyDownload extends Command
         // SOAP validation
         if (! $verify->getStatus()->isAccepted()) {
 
-            $message = "Fallo al verificar {$requestId}: " .
+            $message = "Verify failed {$requestId}: " .
                 $verify->getStatus()->getMessage();
 
             $request->update([
@@ -101,7 +101,7 @@ class SatVerifyDownload extends Command
 
         if (! $verify->getCodeRequest()->isAccepted()) {
 
-            $message = "Solicitud {$requestId} rechazada: " .
+            $message = "Request {$requestId} rejected: " .
                 $verify->getCodeRequest()->getMessage();
 
             $request->update([
@@ -123,7 +123,7 @@ class SatVerifyDownload extends Command
          */
         if ($statusRequest->isExpired()) {
 
-            $message = "La solicitud {$requestId} expiró.";
+            $message = "Request {$requestId} expired.";
 
             $request->update([
                 'status' => 'failed',
@@ -139,7 +139,7 @@ class SatVerifyDownload extends Command
 
         if ($statusRequest->isFailure()) {
 
-            $message = "La solicitud {$requestId} falló.";
+            $message = "Request {$requestId} failed.";
 
             $request->update([
                 'status' => 'failed',
@@ -155,7 +155,7 @@ class SatVerifyDownload extends Command
 
         if ($statusRequest->isRejected()) {
 
-            $message = "La solicitud {$requestId} fue rechazada por SAT.";
+            $message = "Request {$requestId} was rejected by SAT.";
 
             $request->update([
                 'status' => 'rejected',
@@ -173,7 +173,7 @@ class SatVerifyDownload extends Command
 
             $request->update(['status' => 'in_progress']);
 
-            $message = "La solicitud {$requestId} se está procesando...";
+            $message = "Request {$requestId} is in progress...";
 
             app(TelegramService::class)
                 ->notify_from_server($message);
@@ -186,7 +186,7 @@ class SatVerifyDownload extends Command
 
             $request->update(['status' => 'accepted']);
 
-            $message = "La solicitud {$requestId} fue aceptada y está en proceso...";
+            $message = "Request {$requestId} was accepted and its in progress...";
 
             app(TelegramService::class)
                 ->notify_from_server($message);
@@ -253,7 +253,7 @@ class SatVerifyDownload extends Command
                 $data
             );
 
-            $message = "Paquete {$packageId} descargado correctamente";
+            $message = "Package {$packageId} downloaded.";
             $downladedPackages .= "{$message}\n";
 
             $this->info($message);
