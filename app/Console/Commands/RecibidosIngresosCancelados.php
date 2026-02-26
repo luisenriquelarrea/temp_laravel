@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use App\Services\DescargaMasivaSatService;
 use App\Services\TelegramService;
 
-class SatCreateDownload extends Command
+class RecibidosIngresosCancelados extends Command
 {
     protected DescargaMasivaSatService $service;
 
@@ -24,7 +24,7 @@ class SatCreateDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sat-create-download
+    protected $signature = 'app:recibidos-ingresos-cancelados
                         {date?}
                         {--limitReached : Randomize seconds to avoid duplicate lifetime limit}';
 
@@ -59,7 +59,7 @@ class SatCreateDownload extends Command
         } else {
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-            $start = $date->copy()->subDays(3)->startOfDay();
+            $start = $date->copy()->startOfYear()->startOfDay();
             $end   = $date->copy()->endOfDay();
         }
 
@@ -76,10 +76,11 @@ class SatCreateDownload extends Command
         $requestId = $this->service->createRequest([
             'start' => $start,
             'end' => $end,
+            'document_status' => 'cancelled',
             'is_cron_request' => true
         ]);
 
-        $message = "Request created: {$requestId}";
+        $message = "Request cancelled created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);
