@@ -136,6 +136,7 @@ class DescargaMasivaSatService
                 'date_to' => $options['end'],
                 'status' => 'created',
                 'document_status' => $options['document_status'],
+                'document_type' => $options['document_type'],
                 'is_cron_request' => $options['is_cron_request']
             ]);
 

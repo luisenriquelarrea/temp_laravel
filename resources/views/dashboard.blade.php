@@ -12,7 +12,7 @@
     @endif
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
                 <h2 class="text-xl font-bold mb-4">Solicitudes de descarga</h2>
@@ -26,14 +26,13 @@
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="border px-4 py-2">Acciones</th>
-                            <th class="p-2 border">ID</th>
+                            <th class="p-2 border">Fecha solicitud</th>
                             <th class="p-2 border">Estatus CFDI</th>
-                            <th class="p-2 border">Solicitud ID</th>
                             <th class="p-2 border">Inicio</th>
                             <th class="p-2 border">Final</th>
+                            <th class="p-2 border">Tipo CFDI</th>
+                            <th class="p-2 border">Solicitud ID</th>
                             <th class="p-2 border">Estatus</th>
-                            <th class="p-2 border">Paquetes</th>
-                            <th class="p-2 border">Ultima consulta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,7 +51,7 @@
                                         <span class="text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="p-2 border">{{ $request->id }}</td>
+                                <td class="p-2 border">{{ $request->created_at }}</td>
                                 <td class="p-2 border text-center">
                                     @switch($request->document_status)
                                         @case('cancelled')
@@ -68,9 +67,30 @@
                                             @break
                                     @endswitch
                                 </td>
-                                <td class="p-2 border">{{ $request->request_id }}</td>
                                 <td class="p-2 border">{{ $request->date_from }}</td>
                                 <td class="p-2 border">{{ $request->date_to }}</td>
+                                <td class="p-2 border">
+                                    @switch($request->document_type)
+                                        @case('ingreso')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-teal-200 text-teal-800">
+                                                ingreso
+                                            </span>
+                                            @break
+
+                                        @case('egreso')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-orange-200 text-orange-800">
+                                                egreso
+                                            </span>
+                                            @break
+
+                                        @case('pago')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-indigo-200 text-indigo-800">
+                                                pago
+                                            </span>
+                                            @break
+                                    @endswitch
+                                </td>
+                                <td class="p-2 border">{{ $request->request_id }}</td>
                                 <td class="p-2 border text-center">
                                     @switch($request->status)
                                         @case('created')
@@ -121,8 +141,6 @@
                                             </span>
                                     @endswitch
                                 </td>
-                                <td class="p-2 border">{{ $request->packages_count }}</td>
-                                <td class="p-2 border">{{ $request->last_verified_at }}</td>
                             </tr>
                         @empty
                             <tr>

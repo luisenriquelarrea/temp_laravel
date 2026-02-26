@@ -11,6 +11,7 @@ class SatDownloadRequest extends Model
         'date_from',
         'date_to',
         'document_status',
+        'document_type',
         'status',
         'packages_count',
         'last_verified_at',
