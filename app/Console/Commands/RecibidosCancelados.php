@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use App\Services\DescargaMasivaSatService;
 use App\Services\TelegramService;
 
-class RecibidosIngresosActivos extends Command
+class RecibidosCancelados extends Command
 {
     protected DescargaMasivaSatService $service;
 
@@ -24,8 +24,10 @@ class RecibidosIngresosActivos extends Command
      *
      * @var string
      */
-    protected $signature = 'app:recibidos-ingresos-activos
+    protected $signature = 'app:recibidos-cancelados
                         {date?}
+                        {--ingresos : Download ingresos only}
+                        {--egresos : Download egresos only}
                         {--limitReached : Randomize seconds to avoid duplicate lifetime limit}';
 
     /**
@@ -59,7 +61,7 @@ class RecibidosIngresosActivos extends Command
         } else {
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-            $start = $date->copy()->subDays(3)->startOfDay();
+            $start = $date->copy()->startOfYear()->startOfDay();
             $end   = $date->copy()->endOfDay();
         }
 
@@ -71,11 +73,33 @@ class RecibidosIngresosActivos extends Command
         $start = $start->format('Y-m-d H:i:s');
         $end = $end->format('Y-m-d H:i:s');
 
-        $this->info('Iniciando solicitud SAT from: ' . $date->toDateString());
+        $document_types = [];
+
+        if ($this->option('ingresos'))
+            $document_types[] = 'ingreso';
+
+        if ($this->option('egresos'))
+            $document_types[] = 'egreso';
+
+        if (empty($document_types))
+            $document_types = ['ingreso', 'egreso'];
+
+        $this->info('Starting SAT request from: ' . $date->toDateString());
+
+        foreach ($document_types as $type)
+            $this->create_request($start, $end, $type);
+
+        return 0;
+    }
+
+    private function create_request(string $start, string $end, string $document_type){
+        $this->info("Creating request cancelled type of: {$document_type}");
 
         $requestId = $this->service->createRequest([
             'start' => $start,
             'end' => $end,
+            'document_type' => $document_type,
+            'document_status' => 'cancelled',
             'is_cron_request' => true
         ]);
 

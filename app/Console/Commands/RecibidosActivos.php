@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use App\Services\DescargaMasivaSatService;
 use App\Services\TelegramService;
 
-class RecibidosIngresosCancelados extends Command
+class RecibidosActivos extends Command
 {
     protected DescargaMasivaSatService $service;
 
@@ -24,8 +24,10 @@ class RecibidosIngresosCancelados extends Command
      *
      * @var string
      */
-    protected $signature = 'app:recibidos-ingresos-cancelados
+    protected $signature = 'app:recibidos-activos
                         {date?}
+                        {--ingresos : Download ingresos only}
+                        {--egresos : Download egresos only}
                         {--limitReached : Randomize seconds to avoid duplicate lifetime limit}';
 
     /**
@@ -59,7 +61,7 @@ class RecibidosIngresosCancelados extends Command
         } else {
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-            $start = $date->copy()->startOfYear()->startOfDay();
+            $start = $date->copy()->subDays(3)->startOfDay();
             $end   = $date->copy()->endOfDay();
         }
 
@@ -71,16 +73,36 @@ class RecibidosIngresosCancelados extends Command
         $start = $start->format('Y-m-d H:i:s');
         $end = $end->format('Y-m-d H:i:s');
 
-        $this->info('Iniciando solicitud SAT from: ' . $date->toDateString());
+        $document_types = [];
+
+        if ($this->option('ingresos'))
+            $document_types[] = 'ingreso';
+
+        if ($this->option('egresos'))
+            $document_types[] = 'egreso';
+
+        if (empty($document_types))
+            $document_types = ['ingreso', 'egreso'];
+
+        $this->info('Starting SAT request from: ' . $date->toDateString());
+
+        foreach ($document_types as $type)
+            $this->create_request($start, $end, $type);
+
+        return 0;
+    }
+
+    private function create_request(string $start, string $end, string $document_type){
+        $this->info("Creating request type of: {$document_type}");
 
         $requestId = $this->service->createRequest([
             'start' => $start,
             'end' => $end,
-            'document_status' => 'cancelled',
+            'document_type' => $document_type,
             'is_cron_request' => true
         ]);
 
-        $message = "Request cancelled created: {$requestId}";
+        $message = "Request created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);

@@ -11,7 +11,7 @@ use App\Services\TelegramService;
 use App\Models\SatDownloadPackage;
 use App\Models\SatDownloadRequest;
 
-class SatVerifyDownload extends Command
+class VerifyDownload extends Command
 {
     protected DescargaMasivaSatService $service;
 
@@ -26,7 +26,7 @@ class SatVerifyDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sat-verify-download';
+    protected $signature = 'app:verify-download';
 
     /**
      * The console command description.
