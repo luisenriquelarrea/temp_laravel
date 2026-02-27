@@ -13,6 +13,7 @@ class SatDownloadRequest extends Model
         'document_status',
         'document_type',
         'status',
+        'error_message',
         'packages_count',
         'last_verified_at',
         'is_cron_request'

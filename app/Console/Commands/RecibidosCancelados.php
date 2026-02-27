@@ -61,7 +61,8 @@ class RecibidosCancelados extends Command
         } else {
             $date = Carbon::now('America/Mexico_City')->subDay();
 
-            $start = $date->copy()->startOfYear()->startOfDay();
+            //$start = $date->copy()->startOfYear()->startOfDay();
+            $start = $date->copy()->subDays(3)->startOfDay();
             $end   = $date->copy()->endOfDay();
         }
 
