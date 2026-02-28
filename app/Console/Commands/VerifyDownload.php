@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+use Carbon\Carbon;
+
 use App\Services\DescargaMasivaSatService;
 use App\Services\TelegramService;
 
@@ -26,7 +28,7 @@ class VerifyDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:verify-download';
+    protected $signature = 'app:verify-download {date?}';
 
     /**
      * The console command description.
@@ -40,12 +42,26 @@ class VerifyDownload extends Command
      */
     public function handle()
     {
+        $inputDate = $this->argument('date');
+
+        try {
+            $date = $inputDate
+                ? Carbon::createFromFormat('Y-m-d', $inputDate, 'America/Mexico_City')
+                : Carbon::now('America/Mexico_City');
+        } catch (\Exception $e) {
+            $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
+            return 1;
+        }
+
+        $start = $date->copy()->startOfDay();
+        $end   = $date->copy()->endOfDay();
+
         $request = null;
 
         /**
          * STEP 1: Safely fetch one pending request
          */
-        DB::transaction(function () use (&$request) {
+        DB::transaction(function () use ($start, $end, &$request) {
             $request = SatDownloadRequest::whereIn('status', [
                 'created',
                 'accepted',
@@ -56,6 +72,7 @@ class VerifyDownload extends Command
                 $query->whereNull('last_verified_at')
                       ->orWhere('last_verified_at', '<', now()->subMinutes(5));
             })
+            ->whereBetween('created_at', [$start, $end])
             ->lockForUpdate()
             ->orderBy('created_at')
             ->first();
@@ -175,9 +192,6 @@ class VerifyDownload extends Command
 
             $message = "Request {$requestId} is in progress...";
 
-            app(TelegramService::class)
-                ->notify_from_server($message);
-
             $this->warn($message);
             return 0;
         }
@@ -187,9 +201,6 @@ class VerifyDownload extends Command
             $request->update(['status' => 'accepted']);
 
             $message = "Request {$requestId} was accepted and its in progress...";
-
-            app(TelegramService::class)
-                ->notify_from_server($message);
 
             $this->warn($message);
             return 0;
