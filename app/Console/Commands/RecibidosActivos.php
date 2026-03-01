@@ -73,36 +73,38 @@ class RecibidosActivos extends Command
         $start = $start->format('Y-m-d H:i:s');
         $end = $end->format('Y-m-d H:i:s');
 
-        $document_types = [];
+        $ingresos = $this->option('ingresos');
+        $egresos  = $this->option('egresos');
 
-        if ($this->option('ingresos'))
-            $document_types[] = 'ingreso';
+        $document_type = null;
 
-        if ($this->option('egresos'))
-            $document_types[] = 'egreso';
-
-        if (empty($document_types))
-            $document_types = ['ingreso', 'egreso'];
+        if ($ingresos && ! $egresos)
+            $document_type = 'ingreso';
+        elseif ($egresos && ! $ingresos)
+            $document_type = 'egreso';
 
         $this->info('Starting SAT request from: ' . $date->toDateString());
 
-        foreach ($document_types as $type)
-            $this->create_request($start, $end, $type);
+        $this->create_request($start, $end, $document_type);
 
         return 0;
     }
 
-    private function create_request(string $start, string $end, string $document_type){
-        $this->info("Creating request type of: {$document_type}");
+    private function create_request(string $start, string $end, ?string $document_type){
+        $this->info("Creating active request type of: " . ($document_type ?? 'mixed'));
 
-        $requestId = $this->service->createRequest([
+        $options = [
             'start' => $start,
             'end' => $end,
-            'document_type' => $document_type,
             'is_cron_request' => true
-        ]);
+        ];
 
-        $message = "[{$document_type}, active] Request created: {$requestId}";
+        if(! is_null($document_type))
+            $options['document_type'] = $document_type;
+
+        $requestId = $this->service->createRequest($options);
+
+        $message = "Request created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);
