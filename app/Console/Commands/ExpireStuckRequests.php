@@ -53,8 +53,11 @@ class ExpireStuckRequests extends Command
         $request_recreate = [];
 
         foreach ($expiredRequests as $request) {
+            $error_message = "Request {$request->request_id} expired due to timeout.";
+
             $request->update([
-                'status' => 'expired'
+                'status' => 'expired',
+                'error_message' => $error_message
             ]);
 
             $end = Carbon::createFromFormat(
@@ -73,7 +76,7 @@ class ExpireStuckRequests extends Command
                 'document_status' => $request->document_status
             ];
 
-            $message = "[{$request->document_type}, {$request->document_status}] Request {$request->request_id} expired due to timeout.";
+            $message = "[{$request->document_type}, {$request->document_status}] {$error_message}";
 
             app(TelegramService::class)
                 ->notify_from_server($message);

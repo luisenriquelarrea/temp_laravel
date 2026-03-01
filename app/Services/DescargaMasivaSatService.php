@@ -85,12 +85,14 @@ class DescargaMasivaSatService
             'start' => null,
             'end' => null,
             'request_type' => 'xml',
-            'document_type' => 'ingreso',
             'download_type' => 'received',
             'document_status' => 'active',
         ];
 
-        $options = array_merge($defaults, $options);
+        $options = array_merge(
+            $defaults,
+            array_filter($options, fn ($value) => !is_null($value))
+        );
 
         // SAT rule: cancelled -> metadata only
         if ($options['document_status'] === 'cancelled') 
@@ -114,8 +116,17 @@ class DescargaMasivaSatService
                 ))
                 ->withDownloadType(DownloadType::{$options['download_type']}())
                 ->withRequestType(RequestType::{$options['request_type']}())
-                ->withDocumentType(DocumentType::{$options['document_type']}())
                 ->withDocumentStatus(DocumentStatus::{$options['document_status']}());
+
+            $document_type = "mixed";
+
+            if (! empty($options['document_type'])){
+                $document_type = $options['document_type'];
+
+                $request->withDocumentType(
+                    DocumentType::{$document_type}()
+                );
+            }
 
             $query = $service->query($request);
 
@@ -136,7 +147,7 @@ class DescargaMasivaSatService
                 'date_to' => $options['end'],
                 'status' => 'created',
                 'document_status' => $options['document_status'],
-                'document_type' => $options['document_type'],
+                'document_type' => $document_type,
                 'is_cron_request' => $options['is_cron_request']
             ]);
 

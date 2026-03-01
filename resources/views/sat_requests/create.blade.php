@@ -10,7 +10,9 @@
 
                     <!-- Date From -->
                     <div class="mb-4">
-                        <label class="block font-medium">Fecha inicio</label>
+                        <label class="block font-medium">
+                            Fecha inicio <span class="text-red-500">*</span>
+                        </label>
                         <input type="date" name="start"
                             class="w-full border rounded p-2"
                             required>
@@ -18,7 +20,9 @@
 
                     <!-- Date To -->
                     <div class="mb-4">
-                        <label class="block font-medium">Fecha final</label>
+                        <label class="block font-medium">
+                            Fecha final <span class="text-red-500">*</span>
+                        </label>
                         <input type="date" name="end"
                             class="w-full border rounded p-2"
                             required>
@@ -26,8 +30,10 @@
 
                     <!-- Request Type -->
                     <div class="mb-4">
-                        <label class="block font-medium">Tipo solicitud</label>
-                        <select name="request_type" class="w-full border rounded p-2">
+                        <label class="block font-medium">
+                            Tipo solicitud <span class="text-red-500">*</span>
+                        </label>
+                        <select name="request_type" class="w-full border rounded p-2" required>
                             <option value="xml">XML</option>
                             <option value="metadata">Metadata</option>
                         </select>
@@ -35,8 +41,10 @@
 
                     <!-- Download Type -->
                     <div class="mb-4">
-                        <label class="block font-medium">Tipo descarga</label>
-                        <select name="download_type" class="w-full border rounded p-2">
+                        <label class="block font-medium">
+                            Tipo descarga <span class="text-red-500">*</span>
+                        </label>
+                        <select name="download_type" class="w-full border rounded p-2" required>
                             <option value="received">Recibidos</option>
                             <option value="issued">Emitidos</option>
                         </select>
@@ -46,6 +54,7 @@
                     <div class="mb-4">
                         <label class="block font-medium">Tipo documento</label>
                         <select name="document_type" class="w-full border rounded p-2">
+                            <option value="">-- Opcional --</option>
                             <option value="ingreso">Ingreso</option>
                             <option value="egreso">Egreso</option>
                             <option value="pago">Pago</option>
@@ -54,7 +63,9 @@
 
                     <!-- Document Status -->
                     <div class="mb-6">
-                        <label class="block font-medium">Estatus documento</label>
+                        <label class="block font-medium">
+                            Estatus documento <span class="text-red-500">*</span>
+                        </label>
                         <select name="document_status" class="w-full border rounded p-2">
                             <option value="active">Activo</option>
                             <option value="cancelled">Cancelado</option>

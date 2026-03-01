@@ -71,6 +71,12 @@
                                 <td class="p-2 border">{{ $request->date_to }}</td>
                                 <td class="p-2 border">
                                     @switch($request->document_type)
+                                        @case('mixed')
+                                            <span class="px-2 py-1 text-xs font-semibold rounded bg-slate-200 text-slate-800">
+                                                mixed
+                                            </span>
+                                            @break
+                                            
                                         @case('ingreso')
                                             <span class="px-2 py-1 text-xs font-semibold rounded bg-teal-200 text-teal-800">
                                                 ingreso

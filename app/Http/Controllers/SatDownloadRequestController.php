@@ -41,7 +41,7 @@ class SatDownloadRequestController extends Controller
             'end' => 'required|date|after_or_equal:start',
             'download_type' => 'required|string',
             'request_type' => 'required|string',
-            'document_type' => 'required|string',
+            'document_type' => 'nullable|string',
             'document_status' => 'required|string'
         ]);
 
