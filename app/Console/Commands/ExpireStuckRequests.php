@@ -69,12 +69,16 @@ class ExpireStuckRequests extends Command
             $randomEndSecond = random_int(0, 58);
             $end->setSecond($randomEndSecond);
 
-            $request_recreate[] = [
+            $recreated = [
                 'start' => $request->date_from,
                 'end' => $end,
-                'document_type' => $request->document_type,
                 'document_status' => $request->document_status
             ];
+
+            if($request->document_type !== 'mixed')
+                $recreated['document_type'] = $request->document_type;
+
+            $request_recreate[] = $recreated;
 
             $message = "[{$request->document_type}, {$request->document_status}] {$error_message}";
 
@@ -84,34 +88,42 @@ class ExpireStuckRequests extends Command
             $this->info($message);
         }
 
-        foreach ($request_recreate as $request){
+        foreach ($request_recreate as $request)
             $this->create_request($request);
-        }
+
+        return 0;
     }
 
     private function create_request($request){
-        $document_type = $request['document_type'];
+        $document_type = 'mixed';
+        if(isset($request['document_type']))
+            $document_type = $request['document_type'];
+
         $document_status = $request['document_status'];
 
-        if (SatDownloadRequest::whereDate('created_at', today())
+        /*if (SatDownloadRequest::whereDate('created_at', today())
             ->where('document_type', $document_type)
             ->where('document_status', $document_status)
             ->whereIn('status', ['created','accepted','in_progress'])
             ->exists()) {
             return;
-        }
+        }*/
 
-        $this->info("Creating request type of: {$document_type}");
+        $this->info("Creating {$document_status} request type of: {$document_type}");
 
-        $requestId = $this->service->createRequest([
+        $options = [
             'start' => $request['start'],
             'end' => $request['end'],
-            'document_type' => $document_type,
             'document_status' => $document_status,
             'is_cron_request' => true
-        ]);
+        ];
 
-        $message = "[{$document_type}, {$document_status}] Request created: {$requestId}";
+        if($document_type !== 'mixed')
+            $options['document_type'] = $document_type;
+
+        $requestId = $this->service->createRequest($options);
+
+        $message = "Request created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);
