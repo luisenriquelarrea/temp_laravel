@@ -104,7 +104,7 @@ class RecibidosCancelados extends Command
             'is_cron_request' => true
         ]);
 
-        $message = "Request created: {$requestId}";
+        $message = "[{$document_type}, cancelled] Request created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);
