@@ -102,7 +102,7 @@ class RecibidosActivos extends Command
             'is_cron_request' => true
         ]);
 
-        $message = "Request created: {$requestId}";
+        $message = "[{$document_type}, active] Request created: {$requestId}";
 
         app(TelegramService::class)
             ->notify_from_server($message);

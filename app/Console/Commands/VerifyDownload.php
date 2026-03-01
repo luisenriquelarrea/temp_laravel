@@ -276,13 +276,28 @@ class VerifyDownload extends Command
         /**
          * STEP 6: Final state resolution
          */
-        $failedCount = SatDownloadPackage::where('sat_download_request_id', $request->id)
-            ->where('status', 'failed')
-            ->count();
+        $packages = SatDownloadPackage::where('sat_download_request_id', $request->id)->get();
 
-        $request->update([
-            'status' => $failedCount === 0 ? 'completed' : 'partial'
-        ]);
+        $totalPackages = $packages->count();
+        $failedCount = $packages->where('status', 'failed')->count();
+        $downloadedCount = $packages->where('status', 'downloaded')->count();
+
+        if ($failedCount === $totalPackages && $totalPackages > 0) {
+            // All packages failed
+            $request->update(['status' => 'failed']);
+
+        } elseif ($downloadedCount === $totalPackages && $totalPackages > 0) {
+            // All packages succeeded
+            $request->update(['status' => 'completed']);
+
+        } elseif ($failedCount > 0 && $downloadedCount > 0) {
+            // Mixed result
+            $request->update(['status' => 'partial']);
+
+        } else {
+            // Still processing or unknown state
+            $request->update(['status' => 'in_progress']);
+        }
 
         return 0;
     }
