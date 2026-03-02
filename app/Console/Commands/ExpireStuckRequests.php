@@ -60,6 +60,12 @@ class ExpireStuckRequests extends Command
                 'error_message' => $error_message
             ]);
 
+            $start = Carbon::createFromFormat(
+                'Y-m-d H:i:s',
+                $request->date_from,
+                'America/Mexico_City'
+            );
+
             $end = Carbon::createFromFormat(
                 'Y-m-d H:i:s',
                 $request->date_to,
@@ -69,8 +75,11 @@ class ExpireStuckRequests extends Command
             $randomEndSecond = random_int(0, 58);
             $end->setSecond($randomEndSecond);
 
+            $start = $start->format('Y-m-d H:i:s');
+            $end = $end->format('Y-m-d H:i:s');
+
             $recreated = [
-                'start' => $request->date_from,
+                'start' => $start,
                 'end' => $end,
                 'document_status' => $request->document_status
             ];
@@ -101,13 +110,15 @@ class ExpireStuckRequests extends Command
 
         $document_status = $request['document_status'];
 
-        /*if (SatDownloadRequest::whereDate('created_at', today())
+        if (SatDownloadRequest::whereDate('created_at', today())
             ->where('document_type', $document_type)
             ->where('document_status', $document_status)
+            ->where('is_cron_request', true)
             ->whereIn('status', ['created','accepted','in_progress'])
             ->exists()) {
+            
             return;
-        }*/
+        }
 
         $this->info("Creating {$document_status} request type of: {$document_type}");
 
