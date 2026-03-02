@@ -28,7 +28,9 @@ class VerifyDownload extends Command
      *
      * @var string
      */
-    protected $signature = 'app:verify-download {date?}';
+    protected $signature = 'app:verify-download 
+                        {date?}
+                        {--request_id=}';
 
     /**
      * The console command description.
@@ -42,47 +44,18 @@ class VerifyDownload extends Command
      */
     public function handle()
     {
-        $inputDate = $this->argument('date');
-
-        try {
-            $date = $inputDate
-                ? Carbon::createFromFormat('Y-m-d', $inputDate, 'America/Mexico_City')
-                : Carbon::now('America/Mexico_City');
-        } catch (\Exception $e) {
-            $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
-            return 1;
-        }
-
-        $start = $date->copy()->startOfDay();
-        $end   = $date->copy()->endOfDay();
-
         $request = null;
 
         /**
-         * STEP 1: Safely fetch one pending request
+         * STEP 1: Get request whether its by request_id or date range
          */
-        DB::transaction(function () use ($start, $end, &$request) {
-            $request = SatDownloadRequest::whereIn('status', [
-                'created',
-                'accepted',
-                'in_progress',
-                'finished'
-            ])
-            ->where(function ($query) {
-                $query->whereNull('last_verified_at')
-                      ->orWhere('last_verified_at', '<', now()->subMinutes(5));
-            })
-            ->whereBetween('created_at', [$start, $end])
-            ->lockForUpdate()
-            ->orderBy('created_at')
-            ->first();
+        if ($this->option('request_id')) {
+            $requestId = $this->option('request_id');
 
-            if ($request) {
-                $request->update([
-                    'last_verified_at' => now()
-                ]);
-            }
-        });
+            $request = $this->get_request_by_request_id($requestId);
+        }
+        else
+            $request = $this->get_request_by_date_ranges();
 
         if (! $request) {
             $this->info('No pending SAT requests.');
@@ -300,5 +273,66 @@ class VerifyDownload extends Command
         }
 
         return 0;
+    }
+
+    private function get_request_by_date_ranges(): ?SatDownloadRequest
+    {
+        $inputDate = $this->argument('date');
+        try {
+            $date = $inputDate
+                ? Carbon::createFromFormat('Y-m-d', $inputDate, 'America/Mexico_City')
+                : Carbon::now('America/Mexico_City');
+        } catch (\Exception $e) {
+            $this->error('Invalid date format. Use Y-m-d (example: 2026-02-15)');
+            return null;
+        }
+
+        $start = $date->copy()->startOfDay();
+        $end   = $date->copy()->endOfDay();
+
+        $request = null;
+
+        DB::transaction(function () use ($start, $end, &$request) {
+            $request = SatDownloadRequest::whereIn('status', [
+                    'created',
+                    'accepted',
+                    'in_progress',
+                    'finished'
+                ])
+                ->where(function ($query) {
+                    $query->whereNull('last_verified_at')
+                        ->orWhere('last_verified_at', '<', now()->subMinutes(5));
+                })
+                ->whereBetween('created_at', [$start, $end])
+                ->lockForUpdate()
+                ->orderBy('created_at')
+                ->first();
+
+            if ($request)
+                $request->update([
+                    'last_verified_at' => now()
+                ]);
+        });
+
+        return $request;
+    }
+
+    private function get_request_by_request_id(?string $requestId): ?SatDownloadRequest
+    {
+        if (! $requestId)
+            return null;
+        
+        return DB::transaction(function () use ($requestId) {
+            $request = SatDownloadRequest::where('request_id', $requestId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($request)
+                $request->update([
+                    'last_verified_at' => now()
+                ]);
+
+            return $request;
+        });
     }
 }
