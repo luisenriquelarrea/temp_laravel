@@ -49,14 +49,15 @@ class CopyPackagesToServer extends Command
 
         $this->info("Copying ZIP from: " . $date->toDateString());
 
-        $packages = SatDownloadPackage::whereHas('request', function ($query) use ($start, $end) {
-            $query->where('status', 'completed')
-                ->where('document_status', 'active')
-                ->where('is_cron_request', true)
-                ->whereBetween('created_at', [$start, $end]);
-        })
-        ->where('is_copied', false)
-        ->get();
+        $packages = SatDownloadPackage::with('request')
+            ->whereHas('request', function ($query) use ($start, $end) {
+                $query->where('status', 'completed')
+                    ->where('document_status', 'active')
+                    ->where('is_cron_request', true)
+                    ->whereBetween('created_at', [$start, $end]);
+            })
+            ->where('is_copied', false)
+            ->get();
 
         if ($packages->isEmpty()) {
             $this->info('No packages found to copy for ' . $date->toDateString());
@@ -77,8 +78,18 @@ class CopyPackagesToServer extends Command
                 Storage::get($path)
             );
 
+            $cfdi_cron_log = [
+                'packageId' => $package->package_id,
+                'dateFrom' => $package->request->date_from->format('Y-m-d H:i:s'),
+                'dateTo' => $package->request->date_to->format('Y-m-d H:i:s'),
+                'documentStatus' => $package->request->document_status,
+                'documentType' => $package->request->document_type,
+                'status' => 1
+            ];
+
             $payload = [
-                'zip' => 'data:application/x-zip-compressed;base64,' . $base64
+                'zip' => 'data:application/x-zip-compressed;base64,' . $base64,
+                'cronLog' => $cfdi_cron_log
             ];
 
             $base_url = config('services.springboot.base_url');
@@ -115,7 +126,7 @@ class CopyPackagesToServer extends Command
 
         app(TelegramService::class)
             ->notify_from_server($message_script);
-        
+
         return 0;
     }
 }
